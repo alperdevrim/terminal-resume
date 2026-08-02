@@ -1,0 +1,120 @@
+# All resume content lives here. Edit this file to update the site — no
+# component code contains personal/resume content. See README.md for the
+# full schema documentation.
+
+profile:
+  name: "John Doe"
+  title: "Software Engineer"
+  location: "Türkiye"
+  summary: >-
+    Software engineer who enjoys building small, well-crafted tools and
+    polished developer experiences. This site is one of them — replace this
+    summary, and everything else in this file, with your own story.
+
+experience:
+  - company: "Example Corp"
+    position: "Senior Software Engineer"
+    start_date: "2023"
+    end_date: "Present"
+    description:
+      - "Led design and delivery of a core internal platform used by several product teams"
+      - "Mentored junior engineers and helped raise the bar on code review practices"
+      - "Drove adoption of infrastructure-as-code, cutting environment setup time significantly"
+    technologies:
+      - TypeScript
+      - React
+      - Node.js
+      - Terraform
+      - AWS
+
+  - company: "Previous Company"
+    position: "Software Engineer"
+    start_date: "2020"
+    end_date: "2023"
+    description:
+      - "Built and maintained customer-facing web applications"
+      - "Collaborated with design and product to ship features end-to-end"
+      - "Introduced automated testing that reduced regressions in production"
+    technologies:
+      - JavaScript
+      - Python
+      - Docker
+      - PostgreSQL
+
+education:
+  - institution: "Your University"
+    degree: "B.Sc. in Computer Engineering"
+    start_date: "2016"
+    end_date: "2020"
+    details:
+      - "Focused on distributed systems and software architecture"
+
+skills:
+  languages:
+    - TypeScript
+    - JavaScript
+    - Python
+    - Go
+  frontend:
+    - React
+    - Vite
+    - CSS
+  backend:
+    - Node.js
+    - REST APIs
+    - PostgreSQL
+  infrastructure:
+    - Docker
+    - Terraform
+    - AWS
+    - GitHub Actions
+
+projects:
+  - name: "terminal-resume"
+    description: "This site — a resume that behaves like a real terminal, driven entirely by YAML data."
+    technologies:
+      - TypeScript
+      - React
+      - Vite
+    url: "https://github.com/example/terminal-resume"
+
+  - name: "Project Two"
+    description: "A short description of a project worth showing off."
+    technologies:
+      - Python
+      - Docker
+    url: "https://example.com"
+
+  - name: "Project Three"
+    description: "Another project. Replace with something real."
+    technologies:
+      - Go
+    url: null
+
+certifications:
+  - name: "Example Certification"
+    issuer: "Issuing Organization"
+    date: "2025"
+
+contact:
+  email: "john.doe@example.com"
+  phone: null
+  website: null
+
+socials:
+  github: "https://github.com/example"
+  linkedin: "https://linkedin.com/in/example"
+
+# Terminal chrome (not resume content).
+#
+#   user / host  the "user@host" in the user@host:~$ prompt. Either can be
+#                null to fall back to a slug of profile.name (user) or
+#                "resume" (host) — e.g. user: "root", host: "example"
+#                renders root@example:~$.
+#   welcome      the line printed once the boot sequence finishes. Use
+#                {name} to insert profile.name. Null falls back to
+#                "Welcome to {name}'s interactive resume."
+terminal:
+  user: "root"
+  host: "resume"
+  welcome: "Welcome to {name}'s interactive resume."

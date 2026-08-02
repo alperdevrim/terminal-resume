@@ -1,0 +1,287 @@
+:root {
+  --page-bg: #111214;
+  --bg: #000000;
+  --bg-elevated: #0a0a0b;
+  --fg: #c3c8ce;
+  --fg-dim: #767b7f;
+  --heading: #8b98a8;
+  --command: #5f9c82;
+  --dir: #6c87a3;
+  --date: #ab9257;
+  --url: #6ea0b8;
+  --error: #b5605c;
+  --success: #3a7a54;
+  --accent: #5f9c82;
+  --prompt-accent: #8f2f2f;
+  --cursor: #c3c8ce;
+
+  --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--fg);
+  font-family: var(--mono);
+}
+
+#root {
+  display: flex;
+}
+
+/* Visually hidden but present for screen readers / search engines. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.terminal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100dvh;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* CRT vignette + scanlines. Deliberately near-threshold: they should read as
+   "this is a screen", not as a costume. */
+.terminal::before,
+.terminal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.terminal::before {
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+.terminal::after {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(190, 220, 205, 0.022) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+.terminal ::selection {
+  background: var(--fg);
+  color: var(--bg);
+  text-shadow: none;
+}
+
+.terminal-header {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--bg-elevated);
+}
+
+.term-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--fg-dim);
+}
+
+.terminal-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 72%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.terminal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  cursor: text;
+  /* Faint phosphor bloom. */
+  text-shadow: 0 0 8px rgba(190, 220, 205, 0.07);
+}
+
+/* Invisible but measurable single character, used to derive the cols×rows
+   readout in the title bar. */
+.term-measure {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+}
+
+.term-line {
+  min-height: 1.5em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.term-span {
+  color: var(--fg);
+}
+
+.term-span.term-heading {
+  color: var(--heading);
+  font-weight: 700;
+}
+
+.term-span.term-dim {
+  color: var(--fg-dim);
+}
+
+.term-span.term-error {
+  color: var(--error);
+  font-weight: 700;
+}
+
+.term-span.term-success {
+  color: var(--success);
+}
+
+.term-span.term-command {
+  color: var(--command);
+  font-weight: 700;
+}
+
+.term-span.term-dir {
+  color: var(--dir);
+}
+
+.term-span.term-date {
+  color: var(--date);
+}
+
+.term-span.term-prompt {
+  color: var(--prompt-accent);
+  font-weight: 700;
+  user-select: none;
+}
+
+a.term-url {
+  color: var(--url);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a.term-url:hover {
+  color: var(--heading);
+}
+
+a.term-url:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.term-input-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+}
+
+/* The visible line is the echo span; the real input sits transparently on
+   top of it so we can draw a proper block cursor at the caret. */
+.term-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.term-echo {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 1.5em;
+}
+
+.term-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font: inherit;
+  color: transparent;
+  caret-color: transparent;
+}
+
+.term-cursor {
+  background: var(--cursor);
+  color: var(--bg);
+  white-space: pre;
+  animation: term-blink 1.06s steps(1, end) infinite;
+}
+
+/* Unfocused terminals draw a hollow cursor, same as a real emulator. */
+.term-cursor-idle {
+  background: transparent;
+  color: inherit;
+  box-shadow: inset 0 0 0 1px var(--fg-dim);
+  animation: none;
+}
+
+@keyframes term-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-cursor {
+    animation: none;
+  }
+}
+
+.terminal-body::-webkit-scrollbar {
+  width: 10px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+  background: var(--fg-dim);
+}
