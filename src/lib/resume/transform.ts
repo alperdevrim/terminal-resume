@@ -207,5 +207,16 @@ function parseTerminalConfig(value: unknown): TerminalConfig {
     host: asStringOrNull(r.host),
     welcome: asStringOrNull(r.welcome),
     exitUrl: asStringOrNull(r.exit_url),
+    commands: parseCommandToggles(r.commands),
   }
+}
+
+/** Only real booleans count; anything else leaves the command at its default. */
+function parseCommandToggles(value: unknown): Record<string, boolean> {
+  const r = asRecord(value)
+  const result: Record<string, boolean> = {}
+  for (const [name, enabled] of Object.entries(r)) {
+    if (typeof enabled === 'boolean') result[name] = enabled
+  }
+  return result
 }

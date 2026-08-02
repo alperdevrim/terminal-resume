@@ -2,6 +2,24 @@ services:
   web:
     build: .
     image: terminal-resume
+    container_name: terminal-resume
+    restart: unless-stopped
     ports:
       - "8080:80"
-    restart: unless-stopped
+    volumes:
+      # Mounted rather than baked in, so nginx tuning doesn't need an image
+      # rebuild — `docker compose restart web` is enough.
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      # busybox wget ships with the alpine base, so no extra package layer.
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - terminal-resume
+
+networks:
+  terminal-resume:
+    driver: bridge

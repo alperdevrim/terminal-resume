@@ -16,7 +16,7 @@ describe('parseResume', () => {
       certifications: [],
       contact: { email: '', phone: null, website: null },
       socials: {},
-      terminal: { user: null, host: null, welcome: null, exitUrl: null },
+      terminal: { user: null, host: null, welcome: null, exitUrl: null, commands: {} },
     })
   })
 
@@ -119,23 +119,30 @@ describe('parseResume', () => {
       user: 'root',
       host: 'example',
       welcome: 'Hi.',
-     
       exitUrl: null,
+      commands: {},
     })
     expect(parseResume({ terminal: { user: 'root' } }).terminal).toEqual({
       user: 'root',
       host: null,
       welcome: null,
-     
       exitUrl: null,
+      commands: {},
     })
     expect(parseResume({}).terminal).toEqual({
       user: null,
       host: null,
       welcome: null,
-     
       exitUrl: null,
+      commands: {},
     })
+  })
+
+  it('only accepts real booleans as command toggles', () => {
+    const { commands } = parseResume({
+      terminal: { commands: { ls: false, cat: true, whoami: 'nope', history: null } },
+    }).terminal
+    expect(commands).toEqual({ ls: false, cat: true })
   })
 
   it('successfully parses the real resume.yaml shipped with the site', () => {

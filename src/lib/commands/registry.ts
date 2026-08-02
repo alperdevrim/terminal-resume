@@ -13,6 +13,7 @@ import {
   formatWhoami,
 } from '../resume/format'
 import { resolvePath } from '../vfs/resolvePath'
+import { enabledCommands } from './enabled'
 import type { Command, CommandContext, CommandResult } from './types'
 
 function output(lines: OutputLine[]): CommandResult {
@@ -72,7 +73,12 @@ commands.push(
   {
     name: 'help',
     description: 'Show available commands',
-    run: () => output(formatHelp(commands.map((c) => ({ name: c.name, description: c.description })))),
+    run: (_args, ctx) =>
+      output(
+        formatHelp(
+          enabledCommands(ctx.resume, commands).map((c) => ({ name: c.name, description: c.description })),
+        ),
+      ),
   },
   { name: 'about', description: 'About me', run: (_args, ctx) => output(formatAbout(ctx.resume)) },
   {

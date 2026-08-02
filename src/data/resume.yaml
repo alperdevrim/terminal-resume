@@ -143,3 +143,10 @@ terminal:
   welcome: "Welcome to {name}'s interactive resume."
   # Where `exit` sends visitors. Null disables the command's redirect.
   exit_url: "https://example.com"
+  # Per-command on/off switches. Commands are opt-out: any command not
+  # listed here stays enabled, so you only name the ones to hide. `help`
+  # is always available and cannot be switched off.
+  commands:
+    ls: false
+    cat: false
+    whoami: false

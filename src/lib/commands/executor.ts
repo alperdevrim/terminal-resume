@@ -1,5 +1,6 @@
 import { commandSpan, errorSpan, text } from '../output'
 import { tokenize } from './parser'
+import { enabledCommands } from './enabled'
 import { commands } from './registry'
 import { suggestCommand } from './suggest'
 import type { CommandContext, CommandResult } from './types'
@@ -9,12 +10,13 @@ export function executeCommand(input: string, context: CommandContext): CommandR
   const [name, ...args] = tokenize(input)
   if (!name) return null
 
-  const command = commands.find((c) => c.name === name)
+  const available = enabledCommands(context.resume, commands)
+  const command = available.find((c) => c.name === name)
   if (command) return command.run(args, context)
 
   const suggestion = suggestCommand(
     name,
-    commands.map((c) => c.name),
+    available.map((c) => c.name),
   )
 
   return {

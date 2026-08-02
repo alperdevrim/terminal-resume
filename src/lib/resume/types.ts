@@ -83,6 +83,8 @@ export interface TerminalConfig {
   welcome: string | null
   /** Where the `exit` command sends visitors; null disables the redirect. */
   exitUrl: string | null
+  /** Per-command on/off switches. Absent means enabled. */
+  commands: Record<string, boolean>
 }
 
 export interface Resume {

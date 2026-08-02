@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { executeCommand } from '../lib/commands/executor'
+import { enabledCommands } from '../lib/commands/enabled'
 import { commands } from '../lib/commands/registry'
 import type { CommandContext } from '../lib/commands/types'
 import { dim, emptyLine, line, type OutputLine, successSpan, text, textLine } from '../lib/output'
@@ -16,7 +17,8 @@ import { buildVfs } from '../lib/vfs/buildVfs'
 import { OutputLineView } from './OutputLineView'
 
 const vfs = buildVfs(resume)
-const commandNames = commands.map((c) => c.name)
+// Disabled commands must not surface in Tab completion either.
+const commandNames = enabledCommands(resume, commands).map((c) => c.name)
 const promptString = buildPrompt(resume)
 const welcomeMessage = buildWelcome(resume)
 
@@ -24,6 +26,8 @@ const SCANNER_INTERVAL_MS = 70
 const UNIT_SETTLE_MIN_MS = 160
 const UNIT_SETTLE_JITTER_MS = 260
 const WELCOME_TYPE_MS = 28
+const MOTD_LINE_PAUSE_MS = 320
+const MOTD_LINES = [welcomeMessage, "Type 'help' to see available commands."]
 
 const bootUnitLine = (message: string, state: 'pending' | 'ok', frame = 0): OutputLine =>
   state === 'ok'
@@ -110,28 +114,41 @@ export function Terminal() {
       )
     }
 
-    // Types the welcome line out one character at a time, then reveals the
-    // hint line and hands control to the user.
-    const typeWelcome = () => {
+    // Types each MOTD line out one character at a time, pausing between
+    // lines, then hands control to the user.
+    const typeMotd = () => {
       const entryId = makeId()
       setEntries((prev) => [...prev, { id: entryId, kind: 'output', lines: [emptyLine()] }])
 
+      let lineIndex = 0
       let typed = 0
+
       const tick = () => {
         if (cancelled) return
+        const current = MOTD_LINES[lineIndex]!
         typed += 1
-        const partial = welcomeMessage.slice(0, typed)
-        const done = typed >= welcomeMessage.length
-        updateEntry(entryId, [
-          emptyLine(),
-          textLine(partial),
-          ...(done ? [emptyLine(), textLine("Type 'help' to see available commands.")] : []),
-        ])
-        if (done) {
+
+        // Re-render every line each tick: the finished ones in full, the
+        // current one truncated to however much has been "typed" so far.
+        const lines: OutputLine[] = [emptyLine()]
+        for (let i = 0; i < lineIndex; i += 1) {
+          lines.push(textLine(MOTD_LINES[i]!), emptyLine())
+        }
+        lines.push(textLine(current.slice(0, typed)))
+        updateEntry(entryId, lines)
+
+        if (typed < current.length) {
+          timeoutId = setTimeout(tick, WELCOME_TYPE_MS)
+          return
+        }
+
+        lineIndex += 1
+        typed = 0
+        if (lineIndex >= MOTD_LINES.length) {
           setBooted(true)
           return
         }
-        timeoutId = setTimeout(tick, WELCOME_TYPE_MS)
+        timeoutId = setTimeout(tick, MOTD_LINE_PAUSE_MS)
       }
       timeoutId = setTimeout(tick, 260)
     }
@@ -139,7 +156,7 @@ export function Terminal() {
     const runStep = () => {
       if (cancelled) return
       if (index >= steps.length) {
-        typeWelcome()
+        typeMotd()
         return
       }
 

@@ -93,6 +93,8 @@ terminal:                         # terminal chrome, not resume content
   host: "resume"                  # null -> "resume"
   welcome: "Welcome to {name}'s interactive resume."
   exit_url: "https://example.com" # where `exit` goes; null disables it
+  commands:                       # per-command on/off switches
+    ls: false                     # anything unlisted stays enabled
 ```
 
 Every resume section maps to both a command (`experience`, `skills`, ...) and an entry in the virtual filesystem browsable with `ls`/`cat` (e.g. `cat experience/company-name`).
@@ -104,6 +106,17 @@ Every resume section maps to both a command (`experience`, `skills`, ...) and an
 - **`user` / `host`** build the `user@host:~$` prompt. Set either to `null` to fall back to a slug of `profile.name` and `"resume"` respectively, so `user: "root"`, `host: "example"` renders `root@example:~$`.
 - **`welcome`** is the line printed once the boot sequence finishes, typed out character by character. `{name}` is replaced with `profile.name` wherever it appears, so you can rewrite the copy without hardcoding your name — `welcome: "{name}'s resume. Type help."`. Set it to `null` for the default, `"Welcome to {name}'s interactive resume."`
 - **`exit_url`** is where the `exit` command sends visitors — typically a LinkedIn profile or homepage. Leave it `null` and `exit` just prints a message instead of navigating.
+- **`commands`** switches individual commands off. Commands are **opt-out**: anything not listed stays enabled, so adding a command to the registry never requires touching this map — you only name the ones to hide.
+
+  ```yaml
+  terminal:
+    commands:
+      ls: false
+      cat: false
+      whoami: false
+  ```
+
+  A disabled command is genuinely gone, not just hidden: it drops out of `help`, out of Tab completion, out of "did you mean" suggestions, and typing it reports `command not found`. Only real booleans count — `ls: "no"` is ignored. `help` cannot be disabled, since a terminal with no way to list its own commands is a dead end.
 
 ### Proficiency meters and accent colors
 
@@ -170,6 +183,8 @@ A multi-stage [`Dockerfile`](Dockerfile) builds the site with Node and serves th
 ```bash
 docker compose up --build        # http://localhost:8080
 ```
+
+`docker-compose.yml` mounts [`nginx.conf`](nginx.conf) read-only rather than relying on the copy baked into the image, so tuning the server config only needs `docker compose restart web` instead of a rebuild. It also declares a healthcheck (busybox `wget`, already in the alpine base — no extra package layer) and its own bridge network.
 
 Or without compose:
 
