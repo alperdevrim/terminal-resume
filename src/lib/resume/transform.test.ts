@@ -11,11 +11,12 @@ describe('parseResume', () => {
       experience: [],
       education: [],
       skills: {},
+      languages: [],
       projects: [],
       certifications: [],
       contact: { email: '', phone: null, website: null },
       socials: {},
-      terminal: { user: null, host: null, welcome: null },
+      terminal: { user: null, host: null, welcome: null, exitUrl: null },
     })
   })
 
@@ -54,6 +55,7 @@ describe('parseResume', () => {
       endDate: '2022',
       description: [],
       technologies: [],
+      color: null,
     })
   })
 
@@ -83,7 +85,7 @@ describe('parseResume', () => {
     const result = parseResume({
       skills: { cloud: ['AWS'], empty: [], malformed: 'not-an-array' },
     })
-    expect(result.skills).toEqual({ cloud: ['AWS'] })
+    expect(result.skills).toEqual({ cloud: [{ name: 'AWS', level: null, color: null }] })
   })
 
   it('drops projects without a name and preserves a null url', () => {
@@ -117,13 +119,23 @@ describe('parseResume', () => {
       user: 'root',
       host: 'example',
       welcome: 'Hi.',
+     
+      exitUrl: null,
     })
     expect(parseResume({ terminal: { user: 'root' } }).terminal).toEqual({
       user: 'root',
       host: null,
       welcome: null,
+     
+      exitUrl: null,
     })
-    expect(parseResume({}).terminal).toEqual({ user: null, host: null, welcome: null })
+    expect(parseResume({}).terminal).toEqual({
+      user: null,
+      host: null,
+      welcome: null,
+     
+      exitUrl: null,
+    })
   })
 
   it('successfully parses the real resume.yaml shipped with the site', () => {

@@ -6,6 +6,7 @@ import {
   formatEducation,
   formatExperience,
   formatHelp,
+  formatLanguages,
   formatProjects,
   formatSkills,
   formatSocials,
@@ -25,6 +26,17 @@ function errorOutput(message: string): CommandResult {
 function formatHistory(history: string[]): OutputLine[] {
   if (history.length === 0) return [textLine('No commands in history yet.')]
   return history.map((cmd, index) => line(dim(`  ${String(index + 1).padStart(3)}  `), text(cmd)))
+}
+
+/**
+ * Mirrors a real shell's `exit` by handing off to `terminal.exit_url`
+ * (typically a LinkedIn or homepage link). Without one configured there is
+ * nowhere to go, so it just says so rather than pretending to close.
+ */
+function runExit(_args: string[], context: CommandContext): CommandResult {
+  const url = context.resume.terminal.exitUrl
+  if (!url) return output([textLine('There is no way out. Try `help` instead.')])
+  return { kind: 'navigate', url, lines: [line(text('logout'), dim(`  → ${url}`))] }
 }
 
 function runLs(args: string[], context: CommandContext): CommandResult {
@@ -74,6 +86,11 @@ commands.push(
     run: (_args, ctx) => output(formatEducation(ctx.resume)),
   },
   { name: 'skills', description: 'Technical skills', run: (_args, ctx) => output(formatSkills(ctx.resume)) },
+  {
+    name: 'languages',
+    description: 'Spoken languages',
+    run: (_args, ctx) => output(formatLanguages(ctx.resume)),
+  },
   { name: 'projects', description: 'Projects', run: (_args, ctx) => output(formatProjects(ctx.resume)) },
   {
     name: 'certifications',
@@ -93,6 +110,7 @@ commands.push(
     description: 'Show command history',
     run: (_args, ctx) => output(formatHistory(ctx.history)),
   },
+  { name: 'exit', description: 'Leave the terminal', run: runExit },
   { name: 'ls', description: 'List directory contents', run: runLs },
   { name: 'cat', description: 'Print file contents', run: runCat },
 )

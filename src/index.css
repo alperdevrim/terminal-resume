@@ -15,6 +15,17 @@
   --prompt-accent: #8f2f2f;
   --cursor: #c3c8ce;
 
+  /* Accent palette for per-entry `color:` in resume.yaml. Muted to sit
+     inside the existing dark scheme rather than fighting it. */
+  --c-red: #b5605c;
+  --c-green: #5f9c82;
+  --c-yellow: #ab9257;
+  --c-orange: #b08050;
+  --c-blue: #6c87a3;
+  --c-purple: #8f7fa8;
+  --c-pink: #b06f8a;
+  --c-cyan: #5f9298;
+
   --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Consolas,
     'Liberation Mono', monospace;
 
@@ -189,6 +200,19 @@ body {
   font-weight: 700;
   user-select: none;
 }
+
+.term-span.term-bar {
+  color: var(--accent);
+}
+
+.term-span.term-color-red { color: var(--c-red); }
+.term-span.term-color-green { color: var(--c-green); }
+.term-span.term-color-yellow { color: var(--c-yellow); }
+.term-span.term-color-orange { color: var(--c-orange); }
+.term-span.term-color-blue { color: var(--c-blue); }
+.term-span.term-color-purple { color: var(--c-purple); }
+.term-span.term-color-pink { color: var(--c-pink); }
+.term-span.term-color-cyan { color: var(--c-cyan); }
 
 a.term-url {
   color: var(--url);

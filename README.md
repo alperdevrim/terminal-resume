@@ -56,8 +56,16 @@ education:
 
 skills:
   cloud:                          # category name -> list of skills
-    - AWS
-    - Azure
+    - AWS                         # bare string: just a name
+    - name: "Kubernetes"          # or a mapping, for a proficiency meter
+      level: 75                   # 0-100; omit for no meter
+      color: blue                 # optional accent
+
+languages:                        # spoken languages
+  - name: "English"
+    level: 100
+    note: "Native"                # free text, e.g. a CEFR level
+    color: green
 
 projects:
   - name: "Project Name"
@@ -84,6 +92,7 @@ terminal:                         # terminal chrome, not resume content
   user: "root"                    # null -> slug of profile.name
   host: "resume"                  # null -> "resume"
   welcome: "Welcome to {name}'s interactive resume."
+  exit_url: "https://example.com" # where `exit` goes; null disables it
 ```
 
 Every resume section maps to both a command (`experience`, `skills`, ...) and an entry in the virtual filesystem browsable with `ls`/`cat` (e.g. `cat experience/company-name`).
@@ -93,7 +102,20 @@ Every resume section maps to both a command (`experience`, `skills`, ...) and an
 `terminal` is the one section that isn't resume content — it's the shell's own dressing:
 
 - **`user` / `host`** build the `user@host:~$` prompt. Set either to `null` to fall back to a slug of `profile.name` and `"resume"` respectively, so `user: "root"`, `host: "example"` renders `root@example:~$`.
-- **`welcome`** is the line printed once the boot sequence finishes. `{name}` is replaced with `profile.name` wherever it appears, so you can rewrite the copy without hardcoding your name — `welcome: "{name}'s resume. Type help."`. Set it to `null` for the default, `"Welcome to {name}'s interactive resume."`
+- **`welcome`** is the line printed once the boot sequence finishes, typed out character by character. `{name}` is replaced with `profile.name` wherever it appears, so you can rewrite the copy without hardcoding your name — `welcome: "{name}'s resume. Type help."`. Set it to `null` for the default, `"Welcome to {name}'s interactive resume."`
+- **`exit_url`** is where the `exit` command sends visitors — typically a LinkedIn profile or homepage. Leave it `null` and `exit` just prints a message instead of navigating.
+
+### Proficiency meters and accent colors
+
+Skills and languages accept an optional `level` (0–100) that renders as a meter:
+
+```text
+  Kubernetes  [███████████████░░░░░]  75%
+```
+
+A skills category stays a compact `·`-joined list until at least one of its skills declares a level, at which point every skill in that category gets its own row so the meters align. Out-of-range levels are clamped rather than rejected.
+
+Experience, education, project, certification, skill and language entries all accept `color`, drawn from a fixed terminal-ish palette: `red`, `green`, `yellow`, `orange`, `blue`, `purple`, `pink`, `cyan`. Unrecognized names are ignored rather than passed through to the DOM.
 
 ## Adding a new command
 

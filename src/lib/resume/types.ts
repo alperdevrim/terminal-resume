@@ -1,3 +1,5 @@
+import type { SpanColor } from '../output'
+
 export interface Profile {
   name: string
   title: string
@@ -12,6 +14,7 @@ export interface ExperienceEntry {
   endDate: string
   description: string[]
   technologies: string[]
+  color: SpanColor | null
 }
 
 export interface EducationEntry {
@@ -20,22 +23,43 @@ export interface EducationEntry {
   startDate: string
   endDate: string
   details: string[]
+  color: SpanColor | null
+}
+
+/**
+ * A single skill. `level` is an optional 0–100 proficiency that renders as a
+ * meter; leave it null and the skill is listed as a plain name.
+ */
+export interface Skill {
+  name: string
+  level: number | null
+  color: SpanColor | null
 }
 
 /** Category name (e.g. "cloud") -> list of skills in that category. */
-export type SkillCategories = Record<string, string[]>
+export type SkillCategories = Record<string, Skill[]>
+
+/** A spoken language, with the same optional meter as skills. */
+export interface LanguageEntry {
+  name: string
+  level: number | null
+  note: string
+  color: SpanColor | null
+}
 
 export interface ProjectEntry {
   name: string
   description: string
   technologies: string[]
   url: string | null
+  color: SpanColor | null
 }
 
 export interface CertificationEntry {
   name: string
   issuer: string
   date: string
+  color: SpanColor | null
 }
 
 export interface Contact {
@@ -57,6 +81,8 @@ export interface TerminalConfig {
   user: string | null
   host: string | null
   welcome: string | null
+  /** Where the `exit` command sends visitors; null disables the redirect. */
+  exitUrl: string | null
 }
 
 export interface Resume {
@@ -64,6 +90,7 @@ export interface Resume {
   experience: ExperienceEntry[]
   education: EducationEntry[]
   skills: SkillCategories
+  languages: LanguageEntry[]
   projects: ProjectEntry[]
   certifications: CertificationEntry[]
   contact: Contact

@@ -9,7 +9,11 @@ export interface CommandContext {
   history: string[]
 }
 
-export type CommandResult = { kind: 'output'; lines: OutputLine[] } | { kind: 'clear' }
+export type CommandResult =
+  | { kind: 'output'; lines: OutputLine[] }
+  | { kind: 'clear' }
+  /** Hand off to an external URL; the UI performs the actual navigation. */
+  | { kind: 'navigate'; url: string; lines: OutputLine[] }
 
 export interface Command {
   name: string

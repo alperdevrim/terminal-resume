@@ -4,18 +4,22 @@ import {
   dim,
   emptyLine,
   heading,
+  levelBar,
   line,
   type OutputLine,
   text,
   textLine,
+  tint,
   urlSpan,
 } from '../output'
 import type {
   CertificationEntry,
   EducationEntry,
   ExperienceEntry,
+  LanguageEntry,
   ProjectEntry,
   Resume,
+  Skill,
 } from './types'
 
 function titleCase(slug: string): string {
@@ -70,7 +74,7 @@ export function formatAbout(resume: Resume): OutputLine[] {
 
 export function formatExperienceEntry(entry: ExperienceEntry): OutputLine[] {
   const lines: OutputLine[] = [
-    [heading(`${entry.position} — ${entry.company}`)],
+    [tint(heading(`${entry.position} — ${entry.company}`), entry.color)],
     [dateSpan(`${entry.startDate} – ${entry.endDate}`)],
   ]
   for (const item of entry.description) {
@@ -91,7 +95,7 @@ export function formatExperience(resume: Resume): OutputLine[] {
 
 export function formatEducationEntry(entry: EducationEntry): OutputLine[] {
   const lines: OutputLine[] = [
-    [heading(`${entry.degree} — ${entry.institution}`)],
+    [tint(heading(`${entry.degree} — ${entry.institution}`), entry.color)],
     [dateSpan(`${entry.startDate} – ${entry.endDate}`)],
   ]
   for (const detail of entry.details) {
@@ -107,8 +111,25 @@ export function formatEducation(resume: Resume): OutputLine[] {
   )
 }
 
-export function formatSkillCategory(category: string, skills: string[]): OutputLine[] {
-  return [[heading(titleCase(category))], [text(`  ${skills.join(' · ')}`)]]
+/**
+ * A category renders as a compact ` · `-joined list, unless at least one of
+ * its skills declares a level — then every skill gets its own row so the
+ * meters line up in a column.
+ */
+export function formatSkillCategory(category: string, skills: Skill[]): OutputLine[] {
+  const heading_ = [heading(titleCase(category))]
+  if (!skills.some((skill) => skill.level !== null)) {
+    return [heading_, [text(`  ${skills.map((skill) => skill.name).join(' · ')}`)]]
+  }
+  const width = Math.max(...skills.map((skill) => skill.name.length))
+  return [
+    heading_,
+    ...skills.map((skill) =>
+      skill.level === null
+        ? line(text(`  ${skill.name.padEnd(width)}  `))
+        : line(text(`  ${skill.name.padEnd(width)}  `), ...levelBar(skill.level, skill.color)),
+    ),
+  ]
 }
 
 export function formatSkills(resume: Resume): OutputLine[] {
@@ -119,8 +140,27 @@ export function formatSkills(resume: Resume): OutputLine[] {
   )
 }
 
+export function formatLanguages(resume: Resume): OutputLine[] {
+  const { languages } = resume
+  if (languages.length === 0) {
+    return [[heading('Languages')], textLine('No languages listed.')]
+  }
+  const width = Math.max(...languages.map((entry) => entry.name.length))
+  return [
+    [heading('Languages')],
+    ...languages.map((entry) => formatLanguageRow(entry, width)),
+  ]
+}
+
+function formatLanguageRow(entry: LanguageEntry, width: number): OutputLine {
+  const row: OutputLine = [text(`  ${entry.name.padEnd(width)}  `)]
+  if (entry.level !== null) row.push(...levelBar(entry.level, entry.color))
+  if (entry.note) row.push(dim(`  ${entry.note}`))
+  return row
+}
+
 export function formatProjectEntry(project: ProjectEntry): OutputLine[] {
-  const lines: OutputLine[] = [[heading(project.name)]]
+  const lines: OutputLine[] = [[tint(heading(project.name), project.color)]]
   if (project.description) lines.push(textLine(project.description))
   if (project.technologies.length > 0) {
     lines.push([dim(`Technologies: ${project.technologies.join(', ')}`)])
@@ -134,7 +174,10 @@ export function formatProjects(resume: Resume): OutputLine[] {
 }
 
 export function formatCertificationEntry(cert: CertificationEntry): OutputLine[] {
-  return [[heading(cert.name)], [text(cert.issuer), dateSpan(` · ${cert.date}`)]]
+  return [
+    [tint(heading(cert.name), cert.color)],
+    [text(cert.issuer), dateSpan(` · ${cert.date}`)],
+  ]
 }
 
 export function formatCertifications(resume: Resume): OutputLine[] {

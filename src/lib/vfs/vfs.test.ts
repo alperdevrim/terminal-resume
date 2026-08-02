@@ -22,6 +22,7 @@ describe('buildVfs', () => {
       'experience',
       'education',
       'skills',
+      'languages',
       'projects',
       'certifications',
       'contact',

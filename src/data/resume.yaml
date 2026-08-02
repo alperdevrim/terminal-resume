@@ -14,6 +14,7 @@ profile:
 experience:
   - company: "Example Corp"
     position: "Senior Software Engineer"
+    color: cyan
     start_date: "2023"
     end_date: "Present"
     description:
@@ -29,6 +30,7 @@ experience:
 
   - company: "Previous Company"
     position: "Software Engineer"
+    color: purple
     start_date: "2020"
     end_date: "2023"
     description:
@@ -49,12 +51,21 @@ education:
     details:
       - "Focused on distributed systems and software architecture"
 
+# A skill is either a bare string or a mapping. Add `level` (0-100) to draw a
+# proficiency meter, and `color` to accent it. The two forms can be mixed: a
+# category renders as a compact list until at least one skill has a level,
+# then every skill in it gets its own row.
 skills:
-  languages:
-    - TypeScript
-    - JavaScript
-    - Python
-    - Go
+  core:
+    - name: "TypeScript"
+      level: 90
+      color: blue
+    - name: "Python"
+      level: 75
+      color: yellow
+    - name: "Go"
+      level: 55
+      color: cyan
   frontend:
     - React
     - Vite
@@ -68,6 +79,18 @@ skills:
     - Terraform
     - AWS
     - GitHub Actions
+
+# Spoken languages. Same optional `level`/`color` as skills, plus a free-text
+# `note` for things like CEFR levels.
+languages:
+  - name: "English"
+    level: 100
+    note: "Native"
+    color: green
+  - name: "Spanish"
+    level: 60
+    note: "B2"
+    color: orange
 
 projects:
   - name: "terminal-resume"
@@ -118,3 +141,5 @@ terminal:
   user: "root"
   host: "resume"
   welcome: "Welcome to {name}'s interactive resume."
+  # Where `exit` sends visitors. Null disables the command's redirect.
+  exit_url: "https://example.com"

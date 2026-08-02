@@ -1,4 +1,12 @@
-import type { OutputLine } from '../lib/output'
+import type { OutputLine, OutputSpan } from '../lib/output'
+
+/** `kind` sets the base style; an optional `color` accent layers on top. */
+function classNameFor(span: OutputSpan): string {
+  const classes = ['term-span']
+  if (span.kind) classes.push(`term-${span.kind}`)
+  if (span.color) classes.push(`term-color-${span.color}`)
+  return classes.join(' ')
+}
 
 export function OutputLineView({ line }: { line: OutputLine }) {
   if (line.length === 0) return <div className="term-line" />
@@ -17,7 +25,7 @@ export function OutputLineView({ line }: { line: OutputLine }) {
             {span.text}
           </a>
         ) : (
-          <span key={index} className={span.kind ? `term-span term-${span.kind}` : 'term-span'}>
+          <span key={index} className={classNameFor(span)}>
             {span.text}
           </span>
         ),

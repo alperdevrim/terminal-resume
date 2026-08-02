@@ -79,3 +79,21 @@ describe('executeCommand', () => {
     expect(text).toContain('ls')
   })
 })
+
+describe('exit command', () => {
+  it('returns a navigate result pointing at terminal.exit_url', () => {
+    const resume = parseResume({ terminal: { exit_url: 'https://example.com/out' } })
+    const result = executeCommand('exit', {
+      resume,
+      vfs: buildVfs(resume),
+      history: [],
+    })
+    expect(result).toMatchObject({ kind: 'navigate', url: 'https://example.com/out' })
+  })
+
+  it('stays put when no exit_url is configured', () => {
+    const resume = parseResume({})
+    const result = executeCommand('exit', { resume, vfs: buildVfs(resume), history: [] })
+    expect(result?.kind).toBe('output')
+  })
+})

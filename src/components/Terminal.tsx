@@ -23,6 +23,7 @@ const welcomeMessage = buildWelcome(resume)
 const SCANNER_INTERVAL_MS = 70
 const UNIT_SETTLE_MIN_MS = 160
 const UNIT_SETTLE_JITTER_MS = 260
+const WELCOME_TYPE_MS = 28
 
 const bootUnitLine = (message: string, state: 'pending' | 'ok', frame = 0): OutputLine =>
   state === 'ok'
@@ -109,11 +110,36 @@ export function Terminal() {
       )
     }
 
+    // Types the welcome line out one character at a time, then reveals the
+    // hint line and hands control to the user.
+    const typeWelcome = () => {
+      const entryId = makeId()
+      setEntries((prev) => [...prev, { id: entryId, kind: 'output', lines: [emptyLine()] }])
+
+      let typed = 0
+      const tick = () => {
+        if (cancelled) return
+        typed += 1
+        const partial = welcomeMessage.slice(0, typed)
+        const done = typed >= welcomeMessage.length
+        updateEntry(entryId, [
+          emptyLine(),
+          textLine(partial),
+          ...(done ? [emptyLine(), textLine("Type 'help' to see available commands.")] : []),
+        ])
+        if (done) {
+          setBooted(true)
+          return
+        }
+        timeoutId = setTimeout(tick, WELCOME_TYPE_MS)
+      }
+      timeoutId = setTimeout(tick, 260)
+    }
+
     const runStep = () => {
       if (cancelled) return
       if (index >= steps.length) {
-        setEntries((prev) => [...prev, motdEntry()])
-        setBooted(true)
+        typeWelcome()
         return
       }
 
@@ -212,6 +238,13 @@ export function Terminal() {
     })
     setInputValue('')
     setCaretPos(0)
+
+    // Deferred so the echoed `logout` line paints before the page unloads.
+    if (result?.kind === 'navigate') {
+      window.setTimeout(() => {
+        window.location.href = result.url
+      }, 350)
+    }
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {

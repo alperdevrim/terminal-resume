@@ -1,11 +1,14 @@
+import { asSpanColor } from '../output'
 import type {
   CertificationEntry,
   Contact,
   EducationEntry,
   ExperienceEntry,
+  LanguageEntry,
   Profile,
   ProjectEntry,
   Resume,
+  Skill,
   SkillCategories,
   Socials,
   TerminalConfig,
@@ -24,6 +27,7 @@ export function parseResume(raw: unknown): Resume {
     experience: parseArray(root.experience, parseExperienceEntry),
     education: parseArray(root.education, parseEducationEntry),
     skills: parseSkills(root.skills),
+    languages: parseArray(root.languages, parseLanguageEntry),
     projects: parseArray(root.projects, parseProjectEntry),
     certifications: parseArray(root.certifications, parseCertificationEntry),
     contact: parseContact(root.contact),
@@ -52,6 +56,12 @@ function asStringOrNull(value: unknown): string | null {
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.filter((item): item is string => typeof item === 'string')
+}
+
+/** A 0-100 proficiency, or null when absent/unusable. Out-of-range values clamp. */
+function asLevelOrNull(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null
+  return Math.max(0, Math.min(100, value))
 }
 
 function parseArray<T>(value: unknown, parseEntry: (entry: unknown) => T | null): T[] {
@@ -86,6 +96,7 @@ function parseExperienceEntry(value: unknown): ExperienceEntry | null {
     endDate: asString(value.end_date, 'Present'),
     description: asStringArray(value.description),
     technologies: asStringArray(value.technologies),
+    color: asSpanColor(value.color),
   }
 }
 
@@ -100,17 +111,50 @@ function parseEducationEntry(value: unknown): EducationEntry | null {
     startDate: asString(value.start_date),
     endDate: asString(value.end_date),
     details: asStringArray(value.details),
+    color: asSpanColor(value.color),
   }
+}
+
+/**
+ * A skill is either a bare string (`- Docker`) or a mapping that adds an
+ * optional proficiency meter and accent (`- { name: Docker, level: 75 }`).
+ * Both forms may be mixed freely within a category.
+ */
+function parseSkill(value: unknown): Skill | null {
+  if (typeof value === 'string') {
+    const name = value.trim()
+    return name ? { name, level: null, color: null } : null
+  }
+  if (!isRecord(value)) return null
+  const name = asString(value.name)
+  if (!name) return null
+  return { name, level: asLevelOrNull(value.level), color: asSpanColor(value.color) }
 }
 
 function parseSkills(value: unknown): SkillCategories {
   const r = asRecord(value)
   const result: SkillCategories = {}
   for (const [category, skills] of Object.entries(r)) {
-    const parsed = asStringArray(skills)
+    const parsed = parseArray(skills, parseSkill)
     if (parsed.length > 0) result[category] = parsed
   }
   return result
+}
+
+function parseLanguageEntry(value: unknown): LanguageEntry | null {
+  if (typeof value === 'string') {
+    const name = value.trim()
+    return name ? { name, level: null, note: '', color: null } : null
+  }
+  if (!isRecord(value)) return null
+  const name = asString(value.name)
+  if (!name) return null
+  return {
+    name,
+    level: asLevelOrNull(value.level),
+    note: asString(value.note),
+    color: asSpanColor(value.color),
+  }
 }
 
 function parseProjectEntry(value: unknown): ProjectEntry | null {
@@ -122,6 +166,7 @@ function parseProjectEntry(value: unknown): ProjectEntry | null {
     description: asString(value.description),
     technologies: asStringArray(value.technologies),
     url: asStringOrNull(value.url),
+    color: asSpanColor(value.color),
   }
 }
 
@@ -133,6 +178,7 @@ function parseCertificationEntry(value: unknown): CertificationEntry | null {
     name,
     issuer: asString(value.issuer),
     date: asString(value.date),
+    color: asSpanColor(value.color),
   }
 }
 
@@ -160,5 +206,6 @@ function parseTerminalConfig(value: unknown): TerminalConfig {
     user: asStringOrNull(r.user),
     host: asStringOrNull(r.host),
     welcome: asStringOrNull(r.welcome),
+    exitUrl: asStringOrNull(r.exit_url),
   }
 }
