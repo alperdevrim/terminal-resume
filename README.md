@@ -94,7 +94,8 @@ terminal:                         # terminal chrome, not resume content
   welcome: "Welcome to {name}'s interactive resume."
   exit_url: "https://example.com" # where `exit` goes; null disables it
   commands:                       # per-command on/off switches
-    ls: false                     # anything unlisted stays enabled
+    about: true                   # every command is listed; see below
+    ls: false
 ```
 
 Every resume section maps to both a command (`experience`, `skills`, ...) and an entry in the virtual filesystem browsable with `ls`/`cat` (e.g. `cat experience/company-name`).
@@ -106,17 +107,34 @@ Every resume section maps to both a command (`experience`, `skills`, ...) and an
 - **`user` / `host`** build the `user@host:~$` prompt. Set either to `null` to fall back to a slug of `profile.name` and `"resume"` respectively, so `user: "root"`, `host: "example"` renders `root@example:~$`.
 - **`welcome`** is the line printed once the boot sequence finishes, typed out character by character. `{name}` is replaced with `profile.name` wherever it appears, so you can rewrite the copy without hardcoding your name — `welcome: "{name}'s resume. Type help."`. Set it to `null` for the default, `"Welcome to {name}'s interactive resume."`
 - **`exit_url`** is where the `exit` command sends visitors — typically a LinkedIn profile or homepage. Leave it `null` and `exit` just prints a message instead of navigating.
-- **`commands`** switches individual commands off. Commands are **opt-out**: anything not listed stays enabled, so adding a command to the registry never requires touching this map — you only name the ones to hide.
+- **`commands`** switches individual commands on and off. **Every** command can be toggled — the shipped `resume.yaml` lists all of them explicitly, so the block doubles as the canonical index of what the terminal knows:
 
   ```yaml
   terminal:
     commands:
+      help: true
+      about: true
+      experience: true
+      education: true
+      skills: true
+      languages: true
+      projects: true
+      certifications: true
+      contact: true
+      socials: true
+      history: true
+      clear: true
+      exit: true
+      whoami: false
       ls: false
       cat: false
-      whoami: false
   ```
 
-  A disabled command is genuinely gone, not just hidden: it drops out of `help`, out of Tab completion, out of "did you mean" suggestions, and typing it reports `command not found`. Only real booleans count — `ls: "no"` is ignored. `help` cannot be disabled, since a terminal with no way to list its own commands is a dead end.
+  Commands are **opt-out**, so deleting a line leaves that command enabled and adding a new command to the registry never requires touching this map. A disabled command is genuinely gone, not merely hidden: it drops out of `help`, out of Tab completion, out of "did you mean" suggestions, and typing it reports `command not found`. Only real booleans count — `ls: "no"` is ignored.
+
+  `help` is toggleable like everything else. Turning it off is allowed, but leaves visitors with no way to discover the remaining commands.
+
+  A test asserts this block lists exactly the commands in the registry, so the two can't drift apart.
 
 ### Proficiency meters and accent colors
 

@@ -143,10 +143,25 @@ terminal:
   welcome: "Welcome to {name}'s interactive resume."
   # Where `exit` sends visitors. Null disables the command's redirect.
   exit_url: "https://example.com"
-  # Per-command on/off switches. Commands are opt-out: any command not
-  # listed here stays enabled, so you only name the ones to hide. `help`
-  # is always available and cannot be switched off.
+  # Per-command on/off switches. Every command in the registry is listed
+  # here, so this doubles as the canonical list of what the terminal knows.
+  # Commands are opt-out: deleting a line leaves that command enabled.
+  # Disabling `help` is allowed, but leaves visitors no way to discover
+  # the others.
   commands:
+    help: true
+    about: true
+    experience: true
+    education: true
+    skills: true
+    languages: true
+    projects: true
+    certifications: true
+    contact: true
+    socials: true
+    history: true
+    clear: true
+    exit: true
+    whoami: false
     ls: false
     cat: false
-    whoami: false

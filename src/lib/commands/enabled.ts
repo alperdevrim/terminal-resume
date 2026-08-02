@@ -7,14 +7,14 @@ import type { Command } from './types'
  * command to the registry doesn't require touching the YAML, while a
  * template user can switch off the ones they don't want.
  *
- * `help` is deliberately not disableable — a terminal with no way to
- * discover its own commands is a dead end.
+ * Every command can be disabled, `help` included — disabling it leaves
+ * visitors with no way to discover the rest, which is the author's call to
+ * make, not this function's.
  *
  * Takes the command list as an argument rather than importing the registry,
  * which would create a cycle (the registry's own `help` needs this).
  */
 export function isCommandEnabled(resume: Resume, name: string): boolean {
-  if (name === 'help') return true
   return resume.terminal.commands[name] !== false
 }
 

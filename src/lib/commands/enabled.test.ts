@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import yaml from 'js-yaml'
 import { describe, expect, it } from 'vitest'
 import { parseResume } from '../resume/transform'
 import { buildVfs } from '../vfs/buildVfs'
@@ -31,9 +34,28 @@ describe('command toggles', () => {
     expect(enabledCommands(resume, commands).map((c) => c.name)).not.toContain('skills')
   })
 
-  it('refuses to disable help, which would strand the user', () => {
+  it('allows every command to be disabled, help included', () => {
     const resume = parseResume({ terminal: { commands: { help: false } } })
-    expect(isCommandEnabled(resume, 'help')).toBe(true)
+    expect(isCommandEnabled(resume, 'help')).toBe(false)
+  })
+
+  it('can disable every command at once without breaking execution', () => {
+    const allOff = Object.fromEntries(commands.map((c) => [c.name, false]))
+    const context = contextFor(allOff)
+    expect(enabledCommands(context.resume, commands)).toEqual([])
+
+    const result = executeCommand('help', context)
+    if (result?.kind !== 'output') throw new Error('unreachable')
+    // No candidates left, so there is nothing to suggest either.
+    expect(flatten(result.lines)).toContain('command not found: help')
+  })
+
+  it('keeps every registry command individually toggleable', () => {
+    for (const { name } of commands) {
+      const resume = parseResume({ terminal: { commands: { [name]: false } } })
+      expect(isCommandEnabled(resume, name)).toBe(false)
+      expect(enabledCommands(resume, commands).map((c) => c.name)).not.toContain(name)
+    }
   })
 
   it('reports a disabled command as not found rather than running it', () => {
@@ -60,5 +82,16 @@ describe('command toggles', () => {
     const result = executeCommand('skils', contextFor({ skills: false }))
     if (result?.kind !== 'output') throw new Error('unreachable')
     expect(flatten(result.lines)).not.toContain("Did you mean 'skills'")
+  })
+})
+
+describe('resume.yaml command switches', () => {
+  it('lists every registered command, so the file stays a complete index', () => {
+    const yamlPath = fileURLToPath(new URL('../../data/resume.yaml', import.meta.url))
+    const raw = yaml.load(readFileSync(yamlPath, 'utf-8')) as {
+      terminal?: { commands?: Record<string, boolean> }
+    }
+    const listed = Object.keys(raw.terminal?.commands ?? {}).sort()
+    expect(listed).toEqual(commands.map((c) => c.name).sort())
   })
 })
