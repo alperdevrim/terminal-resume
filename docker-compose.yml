@@ -12,7 +12,9 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     healthcheck:
       # busybox wget ships with the alpine base, so no extra package layer.
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost/"]
+      # 127.0.0.1 rather than localhost: nginx binds IPv4 only, and wget
+      # tries ::1 first, which would fail with "connection refused".
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3

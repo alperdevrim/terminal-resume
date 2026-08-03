@@ -211,6 +211,8 @@ docker build -t terminal-resume .
 docker run --rm -p 8080:80 terminal-resume
 ```
 
-The nginx config ([`nginx.conf`](nginx.conf)) serves content-hashed files under `/assets/` as immutable with a one-year cache, while `index.html` is sent `no-cache` so a deploy is picked up immediately instead of clients pinning to a stale bundle.
+The nginx config ([`nginx.conf`](nginx.conf)) serves content-hashed files under `/assets/` as immutable with a one-year cache, while `index.html` is sent `no-cache` so a deploy is picked up immediately instead of clients pinning to a stale bundle. `Cache-Control` is derived through a `map` rather than per-location `add_header` directives — nginx discards every inherited `add_header` as soon as a block declares one of its own, which would otherwise strip the security headers from exactly the responses that need them.
+
+The container exposes `/healthz` for the compose healthcheck.
 
 Because `resume.yaml` is baked in at build time, changing your resume means rebuilding the image.
