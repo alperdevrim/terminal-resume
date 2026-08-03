@@ -10,6 +10,7 @@ import { autocomplete } from '../lib/terminal/autocomplete'
 import { BOOT_OK, BOOT_PENDING_FRAMES, getBootSteps } from '../lib/terminal/bootSequence'
 import { CommandHistory } from '../lib/terminal/history'
 import { loginBanner } from '../lib/terminal/loginBanner'
+import { formatHelp } from '../lib/resume/format'
 import { buildWelcome } from '../lib/terminal/motd'
 import { buildPrompt } from '../lib/terminal/prompt'
 import { completePath } from '../lib/vfs/completePath'
@@ -27,7 +28,16 @@ const UNIT_SETTLE_MIN_MS = 160
 const UNIT_SETTLE_JITTER_MS = 260
 const WELCOME_TYPE_MS = 28
 const MOTD_LINE_PAUSE_MS = 320
-const MOTD_LINES = [welcomeMessage, "Type 'help' to see available commands."]
+const MOTD_LINES = [welcomeMessage, 'Type a command to get started.']
+
+// The command list is shown on load rather than making visitors discover
+// `help` first. Built once, since the enabled set can't change at runtime.
+const commandListLines: OutputLine[] = [
+  emptyLine(),
+  ...formatHelp(
+    enabledCommands(resume, commands).map((c) => ({ name: c.name, description: c.description })),
+  ),
+]
 
 const bootUnitLine = (message: string, state: 'pending' | 'ok', frame = 0): OutputLine =>
   state === 'ok'
@@ -80,9 +90,10 @@ export function Terminal() {
       kind: 'output',
       lines: [
         emptyLine(),
-        textLine(welcomeMessage),
+        textLine(MOTD_LINES[0]!),
         emptyLine(),
-        textLine("Type 'help' to see available commands."),
+        textLine(MOTD_LINES[1]!),
+        ...commandListLines,
       ],
     })
 
@@ -145,6 +156,7 @@ export function Terminal() {
         lineIndex += 1
         typed = 0
         if (lineIndex >= MOTD_LINES.length) {
+          updateEntry(entryId, [...lines, ...commandListLines])
           setBooted(true)
           return
         }

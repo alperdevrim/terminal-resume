@@ -105,7 +105,7 @@ Every resume section maps to both a command (`experience`, `skills`, ...) and an
 `terminal` is the one section that isn't resume content — it's the shell's own dressing:
 
 - **`user` / `host`** build the `user@host:~$` prompt. Set either to `null` to fall back to a slug of `profile.name` and `"resume"` respectively, so `user: "root"`, `host: "example"` renders `root@example:~$`.
-- **`welcome`** is the line printed once the boot sequence finishes, typed out character by character. `{name}` is replaced with `profile.name` wherever it appears, so you can rewrite the copy without hardcoding your name — `welcome: "{name}'s resume. Type help."`. Set it to `null` for the default, `"Welcome to {name}'s interactive resume."`
+- **`welcome`** is the line printed once the boot sequence finishes, typed out character by character. The command list is printed straight after it, so visitors see what's available without having to run `help` first. `{name}` is replaced with `profile.name` wherever it appears, so you can rewrite the copy without hardcoding your name — `welcome: "{name}'s resume. Type help."`. Set it to `null` for the default, `"Welcome to {name}'s interactive resume."`
 - **`exit_url`** is where the `exit` command sends visitors — typically a LinkedIn profile or homepage. Leave it `null` and `exit` just prints a message instead of navigating.
 - **`commands`** switches individual commands on and off. **Every** command can be toggled — the shipped `resume.yaml` lists all of them explicitly, so the block doubles as the canonical index of what the terminal knows:
 
